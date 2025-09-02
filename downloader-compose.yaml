@@ -1,0 +1,67 @@
+services:
+  gluetun:
+    image: qmcgaw/gluetun:latest
+    container_name: gluetun
+    restart: always
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    environment:
+      - VPN_SERVICE_PROVIDER=nordvpn
+      - VPN_TYPE=openvpn # or wireguard (then provide WG keys instead)
+      - OPENVPN_USER=${OPENVPN_USER}
+      - OPENVPN_PASSWORD=${OPENVPN_PASSWORD}
+      - SERVER_COUNTRIES=Netherlands
+      - TZ=Europe/Berlin
+      # optional: pick specific server(s)
+      # - SERVER_HOSTNAMES=nl123.nordvpn.com
+    # Only the VPN container exposes ports; the others share its network namespace.
+    ports:
+      - 6789:6789 # nzbget UI
+      - 8081:8081 # qbittorrent WebUI
+      - 6881:6881 # qbittorrent torrenting TCP
+      - 6881:6881/udp # qbittorrent torrenting UDP
+    # Gluetun includes a HEALTHCHECK in the image; compose will use that.
+    # If you want to be explicit, uncomment the healthcheck below:
+    # healthcheck:
+    #   test: ["CMD-SHELL", "wget -q -O- http://127.0.0.1:8000/health || exit 1"]
+    #   interval: 30s
+    #   timeout: 10s
+    #   retries: 5
+
+  nzbget:
+    image: lscr.io/linuxserver/nzbget:latest
+    container_name: nzbget
+    restart: unless-stopped
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Berlin
+    volumes:
+      - /docker/nzbget/data:/config
+      - /wdelements/nzbget/downloads:/downloads
+    # Share Gluetun's network namespace (so traffic goes through the VPN)
+    network_mode: "service:gluetun"
+    depends_on:
+      gluetun:
+        condition: service_healthy
+
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    restart: unless-stopped
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Berlin
+      - WEBUI_PORT=8081
+      - TORRENTING_PORT=6881
+    volumes:
+      - /docker/qbittorrent/appdata:/config
+      - /wdelements/qbittorrent/downloads:/downloads
+    # Share Gluetun's network namespace (so traffic goes through the VPN)
+    network_mode: "service:gluetun"
+    depends_on:
+      gluetun:
+        condition: service_healthy
