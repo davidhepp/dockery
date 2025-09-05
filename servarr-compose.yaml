@@ -1,0 +1,53 @@
+services:
+  jellyseerr:
+    image: fallenbagel/jellyseerr:latest
+    container_name: jellyseerr
+    environment:
+      - LOG_LEVEL=debug
+      - TZ=Europe/Berlin
+      - PORT=5055 #optional
+    ports:
+      - 5055:5055
+    volumes:
+      - /docker/jellyseerr/config:/app/config
+    restart: unless-stopped
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:latest
+    container_name: prowlarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+    volumes:
+      - /docker/prowlarr/data:/config
+    ports:
+      - 9696:9696
+    restart: unless-stopped
+  sonarr:
+    image: lscr.io/linuxserver/sonarr:latest
+    container_name: sonarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+    volumes:
+      - /docker/sonarr/data:/config
+      - /mnt/media/media/series:/tv
+      - /mnt/media/nzbget/downloads:/downloads
+    ports:
+      - 8989:8989
+    restart: unless-stopped
+  radarr:
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: radarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+    volumes:
+      - /docker/radarr/data:/config
+      - /mnt/media/media/movies:/movies
+      - /mnt/media/nzbget/downloads:/downloads
+    ports:
+      - 7878:7878
+    restart: unless-stopped
