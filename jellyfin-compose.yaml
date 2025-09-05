@@ -6,11 +6,11 @@ services:
       - PUID=1000
       - PGID=1000
       - TZ=Europe/Berlin
-      - JELLYFIN_PublishedServerUrl=https://jellyfin.yourserver.de/ #optional
+      - JELLYFIN_PublishedServerUrl=https://jellyfin.yourserver.com/ #optional
     volumes:
       - /docker/jellyfin/library:/config
-      - /mnt/media/media/series:/data/series
-      - /mnt/media/media/movies:/data/movies
+      - /path/to/media/series:/data/series
+      - /path/to/media/movies:/data/movies
     ports:
       - 8096:8096
       - 8920:8920 #optional
@@ -26,7 +26,7 @@ services:
       POSTGRES_USER: username
       POSTGRES_PASSWORD: password
     volumes:
-      - ./jellystat/postgres:/var/lib/postgresql/data
+      - ./path/to/postgres:/var/lib/postgresql/data
 
   jellystat:
     image: cyfershepard/jellystat:latest
@@ -40,7 +40,7 @@ services:
       JWT_SECRET: "super-secret"
       TZ: Europe/Berlin
     volumes:
-      - ./jellystat/backup-data:/app/backend/backup-data
+      - ./path/to/backup-data:/app/backend/backup-data
     ports:
       - "3001:3000"
     depends_on:

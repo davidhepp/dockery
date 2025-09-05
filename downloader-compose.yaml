@@ -40,7 +40,7 @@ services:
       - TZ=Europe/Berlin
     volumes:
       - /docker/nzbget/data:/config
-      - /wdelements/nzbget/downloads:/downloads
+      - /path/to/nzbget/downloads:/downloads
     # Share Gluetun's network namespace (so traffic goes through the VPN)
     network_mode: "service:gluetun"
     depends_on:
@@ -59,7 +59,7 @@ services:
       - TORRENTING_PORT=6881
     volumes:
       - /docker/qbittorrent/appdata:/config
-      - /wdelements/qbittorrent/downloads:/downloads
+      - /path/to/qbittorrent/downloads:/downloads
     # Share Gluetun's network namespace (so traffic goes through the VPN)
     network_mode: "service:gluetun"
     depends_on:
